@@ -11,10 +11,10 @@ Training is done on an executable build using Python. More information can be fo
 Currently the bot is a camera which can rotate on x and y axes. It is placed in a room in which a wall stands with a target appearing randomly. 
 
 * ## Observation Space
-    The bot is fed its forward vector and the dispalcement vector between itself and the target. Rewards are given for reducing the angle between those two vectors and succesfully hitting the target
+    The bot is fed its forward vector and the dispalcement vector between itself and the target.
 
 * ## Action Space
-    The bot can 3 actions. Move up-down, left-right and fire.
+    The bot can take 3 actions. Move up-down, left-right and fire.
 
 * ## Rewards
     The bot is rewarded for reducing the angle between itself and the target displacement vector and for successfully hitting the target
