@@ -1,0 +1,24 @@
+# Folders not in relevent to code/art
+.vs/
+Builds/
+Library/
+Logs/
+obj/
+Packages/
+ProjectSettings/
+Temp/
+
+# Solution and Project files
+*.sln
+*.csproj
+*.json
+
+# Misc
+.collabignore
+
+# ML Agent Files
+Assets/Models
+Assets/Models.meta
+Assets/ML-Agents
+Assets/ML-Agents.meta
+
