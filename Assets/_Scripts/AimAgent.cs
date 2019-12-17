@@ -4,141 +4,136 @@ using UnityEngine;
 using MLAgents;
 
 public class AimAgent : Agent {
-    private GameObject targetObject;
-    private GameObject mainCamera;
-    public Target gameManager;
-    private MoveCamera moveCamera;
-    private float oldAngle = 0f;
-    public float resetTime = 5f;
-    private int currentTime = 0;
-    private bool timeUp = false;
-    float tempAngle = 0f;
-    float diff = 0f;
-    private bool aiming = false;
+    public GameObject   targetObject;
+    public GameObject   gunObject;
+    public Target       target;
+    private Gun         gunComponent;
+    private float       oldAngle = 0f;
+    public float        resetTime = 1f;
+    private int         currentTime = 0;
+    private bool        timeUp = false;
+    float               tempAngle = 0f;
+    private bool        aiming = false;
+    
     // Start is called before the first frame update
     void Start () {
-        targetObject = GameObject.FindGameObjectWithTag("target");
-        mainCamera = GameObject.FindObjectOfType<Camera>().gameObject;
-        moveCamera = mainCamera.GetComponent<MoveCamera>();
-        oldAngle = 180f;
+        gunComponent = gunObject.GetComponent<Gun>();
+        target = targetObject.GetComponent<Target>();
+        tempAngle = GetAngle(gunObject, targetObject);
     }
 
-    void LateUpdate () {
+    void Update () {
+        // run timer
         if (currentTime > resetTime) {
             currentTime = 0;
             timeUp = true;
         }
-        if (oldAngle == 0) {
-            oldAngle = 180f;
-        }
-        if (targetObject == null) {
-            targetObject = GameObject.FindGameObjectWithTag("target");
-        }
-        float diff = GetAngle(mainCamera, targetObject) - tempAngle;
-        if (diff < 0) {
-            aiming = true;
-        }
-        if (diff > 0) {
+
+        // check if gun is moving towards or away from target
+        if (tempAngle != GetAngle(gunObject, targetObject)) {
+            float diff = GetAngle(gunObject, targetObject) - tempAngle;
+            if (diff < 0) {
+                aiming = true;
+            }
+            if (diff >= 0) {
+                aiming = false;
+            }
+            tempAngle = GetAngle(gunObject, targetObject);
+        } else {
             aiming = false;
         }
-        //DebugText.AddDebugText("" + diff);
-        if (currentTime % 50 == 0) {
-            tempAngle = GetAngle(mainCamera, targetObject);
-        }
+        //DebugText.AddDebugText("Dir : " + aiming);
+
+        //Debug.DrawRay(gunObject.transform.position, gunObject.transform.forward * 200f, Color.yellow, 200f);
+        //Debug.DrawRay(gunObject.transform.position, targetObject.transform.position - gunObject.transform.position, Color.red, 200f);
     }
 
+    /// <summary>
+    /// Calculate angle between the vectors of gun and target
+    /// </summary>
+    /// <param name="objectA">Gun object</param>
+    /// <param name="objectB">Target object</param>
+    /// <returns></returns>
     private float GetAngle (GameObject objectA, GameObject objectB) {
         Vector3 targetVector = objectB.transform.position - objectA.transform.position;
         Vector3 crosshairVector = (objectA.transform.forward);
 
         return Vector3.Angle(targetVector, crosshairVector);
     }
-    // Reset environment if target has appeared for n number of times
-    // Reset environment if reward does not increase for set number of time
+
+    /// <summary>
+    /// Reset the camera rotation and move target to new location on the wall
+    /// </summary>
     public override void AgentReset () {
-        //DebugText.AddDebugText("resetting");
-        MoveCamera.ResetCamera();
-        Target.totalTargetsYet = 0;
-        gameManager.Respawn();
+        // reset gun rotation and move target to other location
+        gunComponent.ResetCamera();
+        target.MoveTarget();
     }
 
+    /// <summary>
+    /// The observations collected by the bot are the forward vector of gun and displacement vector to the target to the bot
+    /// </summary>
     public override void CollectObservations () {
-        //base.CollectObservations();
-        if (targetObject == null) { 
-            targetObject = GameObject.FindGameObjectWithTag("target");
-        }
-        //AddVectorObs(GetAngle(mainCamera, targetObject));
-        AddVectorObs(mainCamera.transform.forward);
-        AddVectorObs(targetObject.transform.position - mainCamera.transform.position);
+        // add observations about gun
+        AddVectorObs(gunObject.transform.position);
+        AddVectorObs(gunObject.transform.rotation);
+        // add observations about target
+        AddVectorObs(targetObject.transform.position);
+        AddVectorObs(targetObject.transform.position - gunObject.transform.position);
     }
 
+    /// <summary>
+    /// The bot can take 3 actions, move vertically, horizontally or fire. Currently rewards are not being 
+    /// given for firing, only aiming
+    /// 
+    /// Rewards ar given as followns
+    /// +10      -> lining up with the target
+    /// +0.1    -> moving towards target
+    /// -0.1    -> moving out of wall bounds
+    /// -0.001   -> moving away from target
+    /// -0.001   -> every frame
+    /// </summary>
+    /// <param name="vectorAction"></param>
     public override void AgentAction (float[] vectorAction) {
         // Actions, size = 3
+        // Based on values, move the aim or fire
         float vertical = vectorAction[0];
         float horizontal = vectorAction[1];
         float fire = vectorAction[2];
-        //float left = vectorAction[3];
-        //float fire = vectorAction[4];
-        //DebugText.AddDebugText(horizontal + " , " + vertical);
-        //Debug.Log(horizontal + " , " + vertical);
         if (vertical > 0.5) {
-            //Debug.Log(vertical + ":A");
-            moveCamera.MoveCursor(1);
+            gunComponent.MoveGun(1);
         }
         else if (vertical < -0.5) {
-            //Debug.Log(vertical + ":B");
-            moveCamera.MoveCursor(6);
+            gunComponent.MoveGun(6);
         }
         if (horizontal > 0.5) {
-            //Debug.Log(horizontal + ":C");
-            moveCamera.MoveCursor(4);
+            gunComponent.MoveGun(4);
         }
         if (horizontal < -0.5) {
-            //Debug.Log(horizontal + ":D");
-            moveCamera.MoveCursor(3);
+            gunComponent.MoveGun(3);
         }
         if (fire > 0.9f) {
-            moveCamera.Fire();
+            gunComponent.Fire();
         }
 
-        //DebugText.AddDebugText("0: " + vectorAction[0] + " , 1: " + vectorAction[1] + " , 2: " + vectorAction[2] + " , 3: " + vectorAction[3] + " , 4: " + vectorAction[4]);
-        //DebugText.AddDebugText("0: " + vectorAction[0] + " , 1: " + vectorAction[1] + " , 2: " + vectorAction[2]);
-
-        if (targetObject == null) {
-            targetObject = GameObject.FindGameObjectWithTag("target");
-        }
-
-        if (Input.GetKey(KeyCode.U)) {
-            DebugText.AddDebugText("oldangle: " + tempAngle + "\n newangle: " + GetAngle(mainCamera, targetObject));
-        }
-
-        //DebugText.AddDebugText("aiming is : " + aiming);
         // Rewards 
         // if correctly moving aim towards target
-        //if (aiming) {
-        //    //DebugText.AddDebugText("oldangle: " + tempAngle + "\n newangle: " + GetAngle(mainCamera, targetObject)); 
-        //    //oldAngle = GetAngle(mainCamera, targetObject) + 20f;
-        //    AddReward(0.1f);
-        //} 
+        if (aiming) {
+            AddReward(0.1f);
+        } 
         //else {
-        //    AddReward(-0.1f);
-        //}
-
-        // if target successfully hit
-        //if (Target.targetHit) {
-        //    AddReward(1f);
-        //    Done();
+        //    AddReward(-0.01f);
         //}
 
         if (timeUp) {
             DebugText.AddDebugText("done cause time");
             timeUp = false;
+            AddReward(-0.5f);
             Done();
         }
 
-        RaycastHit hit;
-        Debug.DrawRay(mainCamera.transform.position, mainCamera.transform.forward, Color.red);
-        if (Physics.Raycast(mainCamera.transform.position, mainCamera.transform.forward, out hit)) {
+        // Limit the aim to only wall
+        if (Physics.Raycast(gunObject.transform.position, gunObject.transform.forward, out RaycastHit hit)) {
             if (hit.transform.tag != "target") {
                 if (hit.transform.tag != "wall") {
                     //DebugText.AddDebugText("going out of bounds");
@@ -146,47 +141,19 @@ public class AimAgent : Agent {
                     Done();
                 }
             }
-            if (hit.transform.tag == "target") {
-                SetReward(5f);
+            if (hit.transform.CompareTag("target")) {
+                AddReward(100f);
                 Done();
             }
-            //Debug.Log("tag : " + hit.transform.tag);
         }
 
-        //// if reward gets to -10
-        //if (GetReward() < -9) {
-        //    Done();
-        //}
+        // encourage bot to finish the level quickly
+        AddReward(-0.1f);
 
-        // if 5 targets missed
-        if (Target.totalTargetsYet > 4) {
-            Done();
-        }
-        //DebugText.AddDebugText("Reward" + GetReward());
+        //Debug.Log("Reward" + GetReward());
     }
 
     public override float[] Heuristic () {
-        //// when action = 5
-        //var action = new float[5];
-        //if (Input.GetKey(KeyCode.W)) {
-        //    action[0] = 1;
-        //}
-        //if (Input.GetKey(KeyCode.D)) {
-        //    action[1] = 1;
-        //}
-        //if (Input.GetKey(KeyCode.S)) {
-        //    action[2] = 1;
-        //}
-        //if (Input.GetKey(KeyCode.A)) {
-        //    action[3] = 1;
-        //}
-        //if (InputManager.firePressed) {
-        //    action[4] = 1;
-        //} else {
-        //    action[4] = 0;
-        //}
-
-        // when action = 3
         var action = new float[3];
         
         action[0] = Input.GetAxis("Vertical");
