@@ -26,4 +26,4 @@ Currently the bot is a camera which can rotate on x and y axes. It is placed in 
     * fixed amount of time has passed
     
 # Current Progress
-Currently the Unity environmet and python training funcitonality is working correctly. The actual training of the bot results in it taking random actions. More work is needed for the bot to correctly learn how to aim.
+Currently the Unity environmet and python training funcitonality is working correctly. The actual training of the bot results in it taking random actions. More work is needed for the bot to correctly learn how to aim. 9 instances of the environment are run at the same time to train faster.
