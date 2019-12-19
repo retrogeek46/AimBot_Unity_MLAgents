@@ -16,7 +16,7 @@ public class Target : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void Update() {
+    void Update () {
         //if set time has passed, despawn current target and spawn at another place
         if (currentTime > targetTimeLimit && doMove) {
             MoveTarget();
@@ -24,11 +24,14 @@ public class Target : MonoBehaviour {
 
         // if target has been shot down then respawn target
         if (targetHit) {
+            targetHit = false;
             MoveTarget();
         }
 
         // increment timer keeping float
-        currentTime += 0.01f;
+        if (doMove) {
+            currentTime += 0.01f;
+        }
     }
 
     /// <summary>
@@ -37,7 +40,7 @@ public class Target : MonoBehaviour {
     public void MoveTarget () {
         // reset time and change transform
         currentTime = 0;
-        targetInstance.transform.position = getSpawnLocation(cell);
+        targetInstance.transform.position = GetSpawnLocation(cell);
     }
 
     /// <summary>
@@ -45,13 +48,13 @@ public class Target : MonoBehaviour {
     /// </summary>
     /// <param name="cell">The index of cell to which this target belongs</param>
     /// <returns></returns>
-    private Vector3 getSpawnLocation(int cell) {
+    private Vector3 GetSpawnLocation (int cell) {
         // get necessary multipliers based on the cell
         int rowMultiplier = (int) cell%3;
         int columnMultiplier = (int) cell/3;
 
         // generate a location
-        Vector3 validLocation = new Vector3(Random.Range(-10.0f, 10.0f) + (250 * rowMultiplier), 
+        Vector3 validLocation = new Vector3(Random.Range(-10.0f, 10.0f) + (250 * rowMultiplier),
                                             Random.Range(13.0f, 2.0f),
                                             -0.6f + (250 * columnMultiplier));
         return validLocation;

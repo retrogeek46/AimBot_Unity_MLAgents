@@ -10,11 +10,11 @@ public class AimAgent : Agent {
     private Gun         gunComponent;
     private float       oldAngle = 0f;
     public float        resetTime = 1f;
-    private int         currentTime = 0;
+    public float         currentTime = 0;
     private bool        timeUp = false;
     float               tempAngle = 0f;
     private bool        aiming = false;
-    
+
     // Start is called before the first frame update
     void Start () {
         gunComponent = gunObject.GetComponent<Gun>();
@@ -42,6 +42,7 @@ public class AimAgent : Agent {
         } else {
             aiming = false;
         }
+        currentTime += Time.deltaTime;
         //DebugText.AddDebugText("Dir : " + aiming);
 
         //Debug.DrawRay(gunObject.transform.position, gunObject.transform.forward * 200f, Color.yellow, 200f);
@@ -75,23 +76,27 @@ public class AimAgent : Agent {
     /// </summary>
     public override void CollectObservations () {
         // add observations about gun
-        AddVectorObs(gunObject.transform.position);
+        //AddVectorObs(gunObject.transform.position);
         AddVectorObs(gunObject.transform.rotation);
         // add observations about target
-        AddVectorObs(targetObject.transform.position);
-        AddVectorObs(targetObject.transform.position - gunObject.transform.position);
+        //AddVectorObs(targetObject.transform.position);
+        Vector3 displcacementVec = targetObject.transform.position - gunObject.transform.position;
+        float angle = GetAngle(gunObject, targetObject);
+        AddVectorObs(displcacementVec);
+        AddVectorObs(angle);
     }
 
     /// <summary>
     /// The bot can take 3 actions, move vertically, horizontally or fire. Currently rewards are not being 
     /// given for firing, only aiming
     /// 
-    /// Rewards ar given as followns
-    /// +10      -> lining up with the target
-    /// +0.1    -> moving towards target
-    /// -0.1    -> moving out of wall bounds
-    /// -0.001   -> moving away from target
-    /// -0.001   -> every frame
+    /// Rewards are given as followns
+    /// +100    -> lining up with the target
+    /// +1      -> moving towards target
+    /// -10     -> moving out of wall bounds
+    /// -0.001  -> moving away from target
+    /// -0.001  -> every frame
+    /// -0.5    -> if too much time has passed, deduct points and reset
     /// </summary>
     /// <param name="vectorAction"></param>
     public override void AgentAction (float[] vectorAction) {
@@ -100,35 +105,36 @@ public class AimAgent : Agent {
         float vertical = vectorAction[0];
         float horizontal = vectorAction[1];
         float fire = vectorAction[2];
-        if (vertical > 0.5) {
-            gunComponent.MoveGun(1);
+        // If automatic aiming is not enabled
+        if (!gunComponent.perfectAim.perfectAimmer) {
+            if (vertical > 0.5) {
+                gunComponent.MoveGun(1);
+            } else if (vertical < -0.5) {
+                gunComponent.MoveGun(6);
+            }
+            if (horizontal > 0.5) {
+                gunComponent.MoveGun(4);
+            }
+            if (horizontal < -0.5) {
+                gunComponent.MoveGun(3);
+            }
+            if (fire > 0.9f) {
+                gunComponent.Fire();
+            }
         }
-        else if (vertical < -0.5) {
-            gunComponent.MoveGun(6);
-        }
-        if (horizontal > 0.5) {
-            gunComponent.MoveGun(4);
-        }
-        if (horizontal < -0.5) {
-            gunComponent.MoveGun(3);
-        }
-        if (fire > 0.9f) {
-            gunComponent.Fire();
-        }
-
+       
         // Rewards 
         // if correctly moving aim towards target
         if (aiming) {
-            AddReward(0.1f);
-        } 
-        //else {
-        //    AddReward(-0.01f);
-        //}
+            AddReward(1f);
+        } else {
+            AddReward(-0.01f);
+        }
 
         if (timeUp) {
             DebugText.AddDebugText("done cause time");
             timeUp = false;
-            AddReward(-0.5f);
+            //AddReward(-0.5f);
             Done();
         }
 
@@ -137,7 +143,7 @@ public class AimAgent : Agent {
             if (hit.transform.tag != "target") {
                 if (hit.transform.tag != "wall") {
                     //DebugText.AddDebugText("going out of bounds");
-                    AddReward(-0.1f);
+                    //AddReward(-10f);
                     Done();
                 }
             }
@@ -148,14 +154,14 @@ public class AimAgent : Agent {
         }
 
         // encourage bot to finish the level quickly
-        AddReward(-0.1f);
+        AddReward(-0.01f);
 
         //Debug.Log("Reward" + GetReward());
     }
 
     public override float[] Heuristic () {
         var action = new float[3];
-        
+
         action[0] = Input.GetAxis("Vertical");
         action[1] = Input.GetAxis("Horizontal");
         if (Input.GetKey(KeyCode.F)) {
