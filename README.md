@@ -22,20 +22,31 @@ Currently the bot is a camera which can rotate on x and y axes. It is placed in 
 
 * ## Rewards
     The bot is rewarded for the following tasks with these values:
-    * **+100**  : Correctly aiming at the target
-    * **+0.1**  : Moving the crosshair towards the target
-    * **-0.001**  : Moving the crosshair away from the target
-    * **-10**  : Moving the crosshair out of the wall
-    * **-0.001**  : Every frame, to encourage quicker aiming
-    * **-0.5**  : Every time the environment is reset due to time limit
+    * **+100**  : Correctly aiming at the target.
+    * **+0.1**  : Moving the crosshair towards the target.
+    * **-0.001**  : Moving the crosshair away from the target.
+    * **-10**  : Moving the crosshair out of the wall.
+    * **-0.001**  : Every frame, to encourage quicker aiming.
+    * **-0.5**  : Every time the environment is reset due to time limit.
 
 * ## Reset
     When resetting the environment the target is moved to a new random locaation on the wall and the bot's rotation is set to initial rotation. 
     The environment is reset if 
-    * bot's aim/crosshair leaves the wall
-    * target has been hit
-    * fixed amount of time has passed without the above two happening
+    * bot's aim/crosshair leaves the wall.
+    * target has been hit.
+    * fixed amount of time has passed without the above two happening.
     
+# Controls
+When using heuristics to play around and manually test the environment, the controls to interact with the environmment are as follows
+    * **Movement**  : WASD keys to aim the bot.
+    * **Fire**  : F key is used to fire. Currently not usable as target moves as soon as crosshair lines up with it. 
+    * **Camera**  :
+        * **C**  - Change view to individual rooms and cycle between them. Rooms are numbered from 1 to 9.
+        * **V**  - Switch back to aerial view showing all the training rooms at once.
+
+# Other Features
+There is also a "perfect aimmer" script attached to the gun gameObject (the camera that the bot controls) and it uses Quaternion rotation to perfectly aim at the target. This can be turned on or off by ticking a boolean in the inspector in the PerfectAim component unde the Gun gameobject.
+
 # Current Progress
 Currently the Unity environmet and python training funcitonality is working correctly. The bot is taking aim but with quite a bit of inaccuracy. Different reward parameters and values are bieng tried to correctly teach it to aim accurately. Training does not include actually firin at the moment and only aiming is being learned.
 
