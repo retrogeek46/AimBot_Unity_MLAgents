@@ -38,11 +38,11 @@ Currently the bot is a camera which can rotate on x and y axes. It is placed in 
     
 # Controls
 When using heuristics to play around and manually test the environment, the controls to interact with the environmment are as follows
-    * **Movement**  : WASD keys to aim the bot.
-    * **Fire**  : F key is used to fire. Currently not usable as target moves as soon as crosshair lines up with it. 
-    * **Camera**  :
-        * **C**  - Change view to individual rooms and cycle between them. Rooms are numbered from 1 to 9.
-        * **V**  - Switch back to aerial view showing all the training rooms at once.
+* **Movement**  : WASD keys to aim the bot.
+* **Fire**  : F key is used to fire. Currently not usable as target moves as soon as crosshair lines up with it. 
+* **Camera**  :
+    * **C**  - Change view to individual rooms and cycle between them. Rooms are numbered from 1 to 9.
+    * **V**  - Switch back to aerial view showing all the training rooms at once.
 
 # Other Features
 There is also a "perfect aimmer" script attached to the gun gameObject (the camera that the bot controls) and it uses Quaternion rotation to perfectly aim at the target. This can be turned on or off by ticking a boolean in the inspector in the PerfectAim component unde the Gun gameobject.
