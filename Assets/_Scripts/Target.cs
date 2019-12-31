@@ -6,14 +6,10 @@ public class Target : MonoBehaviour {
 
     public GameObject       targetInstance;
     public int              cell;                       // the cell in which this environment lies
-    public float            currentTime = 0;            // public to watch countdown
-    public float            targetTimeLimit = 1f;
-    public bool             targetHit = false;
-    public bool             doMove = true;
-
-    void Start () {
-        //Application.targetFrameRate = 30;
-    }
+    public float            currentTime = 0;            // public variable to see countdown value
+    public float            targetTimeLimit = 1f;       // public float to set the time after which target moves to new location
+    public bool             targetHit = false;          // bool to check if target has been hit
+    public bool             doMove = true;              // bool to check if target movement after set time is enabled
 
     // Update is called once per frame
     void Update () {

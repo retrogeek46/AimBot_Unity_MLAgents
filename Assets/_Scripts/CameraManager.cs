@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class CameraManager : MonoBehaviour {
 
-    private Camera[] cameras = new Camera[9];
-    int noOfCameras = 0;
-    int counter = 1;
-    Camera currentCamera = null;
+    private Camera[]    cameras = new Camera[9];    // array to get reference to all the room cameras in the scene
+    int                 noOfCameras = 0;            // int to store the total no of cameras in scene
+    int                 counter = 1;                // int to keep track of current room camera index
+    Camera              currentCamera = null;       // currently active camera
+
     // Start is called before the first frame update
     void Start () {
         // get all camera objects into the array
@@ -32,6 +33,10 @@ public class CameraManager : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Switches the view from overworld camera to room camera. If already in room camera mode then
+    /// switches between different rooms.
+    /// </summary>
     public void SwitchToGameCamera () {
         currentCamera.depth = -1;
         if (noOfCameras > 1) {
@@ -40,6 +45,9 @@ public class CameraManager : MonoBehaviour {
         currentCamera.depth = 1;
     }
 
+    /// <summary>
+    /// Switch to the overworld camera from the main camera.
+    /// </summary>
     public void SwitchToMainCamera () {
         currentCamera.depth = -1;
     }

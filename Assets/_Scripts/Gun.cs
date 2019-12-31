@@ -4,19 +4,14 @@ using UnityEngine;
 
 public class Gun : MonoBehaviour {
 
-    public GameObject    gun;                    // static reference to the gameobject
-    public Target        target;                // refernce to the target component
-    public static float  sensitivity = 0.5f;     // sensitivity of the gun rotation
-    public PerfectAim    perfectAim;
+    public GameObject    gun;                       // static reference to the gameobject
+    public Target        target;                    // reference to the target component
+    public static float  sensitivity = 0.5f;        // sensitivity of the gun rotation
+    public PerfectAim    perfectAim;                // reference to the PerfectAim component 
 
     // Start is called before the first frame update
     void Start () {
         perfectAim = gameObject.GetComponent<PerfectAim>();
-    }
-
-    // Update is called once per frame
-    void Update () {
-
     }
 
     /// <summary>

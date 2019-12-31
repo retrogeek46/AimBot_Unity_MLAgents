@@ -4,16 +4,15 @@ using UnityEngine;
 using MLAgents;
 
 public class AimAgent : Agent {
-    public GameObject   targetObject;
-    public GameObject   gunObject;
-    public Target       target;
-    private Gun         gunComponent;
-    private float       oldAngle = 0f;
-    public float        resetTime = 1f;
-    public float         currentTime = 0;
-    private bool        timeUp = false;
-    float               tempAngle = 0f;
-    private bool        aiming = false;
+    public GameObject   targetObject;       // reference to the target gameobject
+    public GameObject   gunObject;          // reference to the gun gameobject
+    public Target       target;             // reference to the Target component on the target gameobject
+    private Gun         gunComponent;       // reference to the Gun component on the gun gameobject
+    public float        resetTime = 1f;     // float to set the time limit after which current episode reloads
+    public float        currentTime = 0;    // public variable to see time elapsed in current episode
+    private bool        timeUp = false;     // bool to check if time limit is up
+    float               tempAngle = 0f;     // float to keep the previous frame angle between gun and target vectors
+    private bool        aiming = false;     // bool to check if correctly aiming and moving towards target
 
     // Start is called before the first frame update
     void Start () {
@@ -43,14 +42,14 @@ public class AimAgent : Agent {
             aiming = false;
         }
         currentTime += Time.deltaTime;
-        //DebugText.AddDebugText("Dir : " + aiming);
 
+        //DebugText.AddDebugText("Dir : " + aiming);
         //Debug.DrawRay(gunObject.transform.position, gunObject.transform.forward * 200f, Color.yellow, 200f);
         //Debug.DrawRay(gunObject.transform.position, targetObject.transform.position - gunObject.transform.position, Color.red, 200f);
     }
 
     /// <summary>
-    /// Calculate angle between the vectors of gun and target
+    /// Calculate angle between the vectors of gun and target.
     /// </summary>
     /// <param name="objectA">Gun object</param>
     /// <param name="objectB">Target object</param>
@@ -63,7 +62,7 @@ public class AimAgent : Agent {
     }
 
     /// <summary>
-    /// Reset the camera rotation and move target to new location on the wall
+    /// Reset the camera rotation and move target to new location on the wall.
     /// </summary>
     public override void AgentReset () {
         // reset gun rotation and move target to other location
@@ -72,33 +71,41 @@ public class AimAgent : Agent {
     }
 
     /// <summary>
-    /// The observations collected by the bot are the forward vector of gun and displacement vector to the target to the bot
+    /// The observations collected by the bot are the forward vector of gun and displacement vector to the 
+    /// target to the bot.
     /// </summary>
     public override void CollectObservations () {
         // add observations about gun
         //AddVectorObs(gunObject.transform.position);
         AddVectorObs(gunObject.transform.rotation);
+        
         // add observations about target
         //AddVectorObs(targetObject.transform.position);
         Vector3 displcacementVec = targetObject.transform.position - gunObject.transform.position;
         float angle = GetAngle(gunObject, targetObject);
+        
         AddVectorObs(displcacementVec);
         AddVectorObs(angle);
     }
 
     /// <summary>
-    /// The bot can take 3 actions, move vertically, horizontally or fire. Currently rewards are not being 
-    /// given for firing, only aiming
+    /// This function defines the actions the agent can take based on the action vector.
+    /// </summary>
     /// 
-    /// Rewards are given as followns
+    /// <para>
+    /// The bot can take 3 actions, move vertically, horizontally or fire. Currently rewards are not being 
+    /// given for firing, only aiming.
+    /// 
+    /// Rewards are given as follows
     /// +100    -> lining up with the target
     /// +1      -> moving towards target
     /// -10     -> moving out of wall bounds
     /// -0.001  -> moving away from target
     /// -0.001  -> every frame
     /// -0.5    -> if too much time has passed, deduct points and reset
-    /// </summary>
-    /// <param name="vectorAction"></param>
+    /// </para>
+    /// 
+    /// <param name="vectorAction">The vector containing the </param>
     public override void AgentAction (float[] vectorAction) {
         // Actions, size = 3
         // Based on values, move the aim or fire
@@ -159,6 +166,10 @@ public class AimAgent : Agent {
         //Debug.Log("Reward" + GetReward());
     }
 
+    /// <summary>
+    /// The Hueristic function to manually enter 
+    /// </summary>
+    /// <returns></returns>
     public override float[] Heuristic () {
         var action = new float[3];
 
