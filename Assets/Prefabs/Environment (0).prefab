@@ -756,7 +756,7 @@ MonoBehaviour:
   targetObject: {fileID: 8404354124505549892}
   gunObject: {fileID: 8488815000178820579}
   target: {fileID: 8488815000781810385}
-  resetTime: 4
+  resetTime: 10
   currentTime: 0
 --- !u!1 &8488814999756144775
 GameObject:

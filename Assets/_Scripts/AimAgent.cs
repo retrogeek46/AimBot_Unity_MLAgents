@@ -133,15 +133,15 @@ public class AimAgent : Agent {
         // Rewards 
         // if correctly moving aim towards target
         if (aiming) {
-            AddReward(1f);
+            AddReward(0.1f);
         } else {
-            AddReward(-0.01f);
+            AddReward(-1f);
         }
 
         if (timeUp) {
             DebugText.AddDebugText("done cause time");
             timeUp = false;
-            //AddReward(-0.5f);
+            AddReward(-0.1f);
             Done();
         }
 
@@ -150,18 +150,18 @@ public class AimAgent : Agent {
             if (hit.transform.tag != "target") {
                 if (hit.transform.tag != "wall") {
                     //DebugText.AddDebugText("going out of bounds");
-                    //AddReward(-10f);
+                    AddReward(-100f);
                     Done();
                 }
             }
             if (hit.transform.CompareTag("target")) {
-                AddReward(100f);
+                AddReward(50f);
                 Done();
             }
         }
 
         // encourage bot to finish the level quickly
-        AddReward(-0.01f);
+        AddReward(-0.1f);
 
         //Debug.Log("Reward" + GetReward());
     }
